@@ -15,17 +15,19 @@
 .fade-transform--move,
 .fade-transform-leave-active,
 .fade-transform-enter-active {
-  transition: all .5s;
+  transition: opacity .42s ease, transform .42s cubic-bezier(.22, 1, .36, 1), filter .42s ease;
 }
 
 .fade-transform-enter {
   opacity: 0;
-  transform: translateX(-30px);
+  filter: blur(10px);
+  transform: translateY(20px) scale(.97);
 }
 
 .fade-transform-leave-to {
   opacity: 0;
-  transform: translateX(30px);
+  filter: blur(8px);
+  transform: translateY(-14px) scale(1.02);
 }
 
 /* breadcrumb transition */

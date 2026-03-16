@@ -53,9 +53,9 @@ public class SwaggerConfig
     {
         return new Info()
             // 设置标题
-            .title("标题：若依管理系统_接口文档")
+            .title("标题：木材管理系统_接口文档")
             // 描述
-            .description("描述：用于管理集团旗下公司的人员信息,具体包括XXX,XXX模块...")
+            .description("描述：用于管理木材业务中的客户、产品、订单、生产与库存模块。")
             // 作者信息
             .contact(new Contact().name(ruoyiConfig.getName()))
             // 版本

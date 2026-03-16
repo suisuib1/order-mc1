@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.OrderStatusLogMapper">
+
+    <resultMap type="OrderStatusLog" id="OrderStatusLogResult">
+        <result property="logId" column="log_id"/>
+        <result property="orderId" column="order_id"/>
+        <result property="fromStatus" column="from_status"/>
+        <result property="toStatus" column="to_status"/>
+        <result property="operationRemark" column="operation_remark"/>
+        <result property="operationBy" column="operation_by"/>
+        <result property="operationTime" column="operation_time"/>
+    </resultMap>
+
+    <insert id="insertOrderStatusLog" parameterType="OrderStatusLog" useGeneratedKeys="true" keyProperty="logId">
+        insert into t_order_status_log (
+            order_id,
+            from_status,
+            to_status,
+            operation_remark,
+            operation_by,
+            operation_time
+        ) values (
+            #{orderId},
+            #{fromStatus},
+            #{toStatus},
+            #{operationRemark},
+            #{operationBy},
+            #{operationTime}
+        )
+    </insert>
+
+    <select id="selectOrderStatusLogListByOrderId" parameterType="Long" resultMap="OrderStatusLogResult">
+        select log_id, order_id, from_status, to_status, operation_remark, operation_by, operation_time
+        from t_order_status_log
+        where order_id = #{orderId}
+        order by log_id asc
+    </select>
+</mapper>

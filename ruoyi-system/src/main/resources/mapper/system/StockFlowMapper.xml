@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.StockFlowMapper">
+
+    <resultMap type="StockFlow" id="StockFlowResult">
+        <result property="flowId" column="flow_id"/>
+        <result property="productId" column="product_id"/>
+        <result property="productName" column="product_name"/>
+        <result property="specification" column="specification"/>
+        <result property="flowType" column="flow_type"/>
+        <result property="changeQuantity" column="change_quantity"/>
+        <result property="beforeQuantity" column="before_quantity"/>
+        <result property="afterQuantity" column="after_quantity"/>
+        <result property="orderNumber" column="order_number"/>
+        <result property="taskNo" column="task_no"/>
+        <result property="businessTime" column="business_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <select id="selectStockFlowList" parameterType="StockFlow" resultMap="StockFlowResult">
+        select sf.flow_id, sf.product_id, p.product_name, p.specification, sf.flow_type, sf.change_quantity,
+               sf.before_quantity, sf.after_quantity, sf.order_number, sf.task_no, sf.business_time,
+               sf.create_by, sf.create_time, sf.remark
+        from t_stock_flow sf
+        left join t_product p on p.product_id = sf.product_id
+        <where>
+            <if test="productId != null">
+                and sf.product_id = #{productId}
+            </if>
+            <if test="productName != null and productName != ''">
+                and p.product_name like concat('%', #{productName}, '%')
+            </if>
+            <if test="flowType != null and flowType != ''">
+                and sf.flow_type = #{flowType}
+            </if>
+            <if test="orderNumber != null and orderNumber != ''">
+                and sf.order_number like concat('%', #{orderNumber}, '%')
+            </if>
+            <if test="taskNo != null and taskNo != ''">
+                and sf.task_no like concat('%', #{taskNo}, '%')
+            </if>
+            <if test="params.beginTime != null and params.beginTime != ''">
+                and sf.business_time &gt;= #{params.beginTime}
+            </if>
+            <if test="params.endTime != null and params.endTime != ''">
+                and sf.business_time &lt;= #{params.endTime}
+            </if>
+        </where>
+        order by sf.flow_id desc
+    </select>
+
+    <insert id="insertStockFlow" parameterType="StockFlow" useGeneratedKeys="true" keyProperty="flowId">
+        insert into t_stock_flow (
+            product_id,
+            flow_type,
+            change_quantity,
+            before_quantity,
+            after_quantity,
+            order_number,
+            task_no,
+            business_time,
+            create_by,
+            create_time,
+            remark
+        ) values (
+            #{productId},
+            #{flowType},
+            #{changeQuantity},
+            #{beforeQuantity},
+            #{afterQuantity},
+            #{orderNumber},
+            #{taskNo},
+            #{businessTime},
+            #{createBy},
+            #{createTime},
+            #{remark}
+        )
+    </insert>
+</mapper>

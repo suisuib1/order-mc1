@@ -39,6 +39,12 @@ public class OrderItem extends BaseEntity
     @Excel(name = "单价")
     private BigDecimal unitPrice;
 
+    /** 小计 */
+    private BigDecimal amount;
+
+    /** 产品规格 */
+    private String specification;
+
     public void setItemId(Long itemId) 
     {
         this.itemId = itemId;
@@ -93,6 +99,24 @@ public class OrderItem extends BaseEntity
     {
         return unitPrice;
     }
+    public void setAmount(BigDecimal amount)
+    {
+        this.amount = amount;
+    }
+
+    public BigDecimal getAmount()
+    {
+        return amount;
+    }
+    public void setSpecification(String specification)
+    {
+        this.specification = specification;
+    }
+
+    public String getSpecification()
+    {
+        return specification;
+    }
 
     @Override
     public String toString() {
@@ -103,6 +127,8 @@ public class OrderItem extends BaseEntity
             .append("productName", getProductName())
             .append("quantity", getQuantity())
             .append("unitPrice", getUnitPrice())
+            .append("amount", getAmount())
+            .append("specification", getSpecification())
             .toString();
     }
 }

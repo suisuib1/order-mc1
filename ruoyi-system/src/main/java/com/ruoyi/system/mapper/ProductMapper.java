@@ -58,4 +58,16 @@ public interface ProductMapper
      * @return 结果
      */
     public int deleteProductByProductIds(Long[] productIds);
+
+    /**
+     * 扣减产品库存
+     *
+     * @param product 产品库存信息
+     * @return 结果
+     */
+    public int decreaseProductStock(Product product);
+
+    public int increaseProductStock(Product product);
+
+    public int updateProductStockQuantity(Product product);
 }

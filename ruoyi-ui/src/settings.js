@@ -37,7 +37,7 @@ module.exports = {
   /**
    * 是否显示logo
    */
-  sidebarLogo: true,
+  sidebarLogo: false,
 
   /**
    * 是否显示动态标题
@@ -52,5 +52,5 @@ module.exports = {
   /**
    * 底部版权文本内容
    */
-  footerContent: 'Copyright © 2026 博客管理系统. All Rights Reserved.'
+  footerContent: 'Copyright © 2026 木材管理系统. All Rights Reserved.'
 }

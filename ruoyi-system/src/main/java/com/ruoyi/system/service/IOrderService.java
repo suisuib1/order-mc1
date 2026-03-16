@@ -2,6 +2,7 @@ package com.ruoyi.system.service;
 
 import java.util.List;
 import com.ruoyi.system.domain.Order;
+import com.ruoyi.system.domain.vo.OrderStatusRequest;
 
 /**
  * 订单Service接口
@@ -58,4 +59,22 @@ public interface IOrderService
      * @return 结果
      */
     public int deleteOrderByOrderId(Long orderId);
+
+    /**
+     * 流转订单状态
+     *
+     * @param orderId 订单ID
+     * @param request 状态流转参数
+     * @return 结果
+     */
+    public int changeOrderStatus(Long orderId, OrderStatusRequest request);
+
+    /**
+     * 生成生产任务单
+     *
+     * @param orderId 订单ID
+     * @param remark 备注
+     * @return 结果
+     */
+    public int generateProductionTask(Long orderId, String remark);
 }

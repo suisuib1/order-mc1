@@ -29,6 +29,14 @@ public interface OrderMapper
     public List<Order> selectOrderList(Order order);
 
     /**
+     * 查询订单项列表
+     *
+     * @param orderId 订单ID
+     * @return 订单项列表
+     */
+    public List<OrderItem> selectOrderItemListByOrderId(Long orderId);
+
+    /**
      * 新增订单
      * 
      * @param order 订单

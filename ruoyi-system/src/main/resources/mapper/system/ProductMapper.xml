@@ -90,4 +90,23 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{productId}
         </foreach>
     </delete>
+
+    <update id="decreaseProductStock" parameterType="Product">
+        update t_product
+        set stock_quantity = stock_quantity - #{stockQuantity}
+        where product_id = #{productId}
+          and stock_quantity &gt;= #{stockQuantity}
+    </update>
+
+    <update id="increaseProductStock" parameterType="Product">
+        update t_product
+        set stock_quantity = stock_quantity + #{stockQuantity}
+        where product_id = #{productId}
+    </update>
+
+    <update id="updateProductStockQuantity" parameterType="Product">
+        update t_product
+        set stock_quantity = #{stockQuantity}
+        where product_id = #{productId}
+    </update>
 </mapper>

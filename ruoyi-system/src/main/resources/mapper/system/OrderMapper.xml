@@ -3,92 +3,201 @@
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ruoyi.system.mapper.OrderMapper">
-    
+
     <resultMap type="Order" id="OrderResult">
-        <result property="orderId"    column="order_id"    />
-        <result property="orderNumber"    column="order_number"    />
-        <result property="customerId"    column="customer_id"    />
-        <result property="customerName"    column="customer_name"    />
-        <result property="totalAmount"    column="total_amount"    />
-        <result property="orderStatus"    column="order_status"    />
-        <result property="createBy"    column="create_by"    />
-        <result property="createTime"    column="create_time"    />
-        <result property="updateBy"    column="update_by"    />
-        <result property="updateTime"    column="update_time"    />
-        <result property="remark"    column="remark"    />
-        <collection property="orderItemList" notNullColumn="sub_item_id" javaType="java.util.List" resultMap="OrderItemResult" />
+        <result property="orderId" column="order_id"/>
+        <result property="orderNumber" column="order_number"/>
+        <result property="customerId" column="customer_id"/>
+        <result property="customerName" column="customer_name"/>
+        <result property="totalAmount" column="total_amount"/>
+        <result property="contractNo" column="contract_no"/>
+        <result property="orderStatus" column="order_status"/>
+        <result property="cancelReason" column="cancel_reason"/>
+        <result property="stockDeducted" column="stock_deducted"/>
+        <result property="productionTaskId" column="production_task_id"/>
+        <result property="productionTaskNo" column="task_no"/>
+        <result property="productionTaskStatus" column="task_status"/>
+        <result property="itemCount" column="item_count"/>
+        <result property="submitReviewTime" column="submit_review_time"/>
+        <result property="reviewTime" column="review_time"/>
+        <result property="contractTime" column="contract_time"/>
+        <result property="productionStartTime" column="production_start_time"/>
+        <result property="productionFinishTime" column="production_finish_time"/>
+        <result property="outboundTime" column="outbound_time"/>
+        <result property="completeTime" column="complete_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
     </resultMap>
 
     <resultMap type="OrderItem" id="OrderItemResult">
-        <result property="itemId"    column="sub_item_id"    />
-        <result property="orderId"    column="sub_order_id"    />
-        <result property="productId"    column="sub_product_id"    />
-        <result property="productName"    column="sub_product_name"    />
-        <result property="quantity"    column="sub_quantity"    />
-        <result property="unitPrice"    column="sub_unit_price"    />
+        <result property="itemId" column="item_id"/>
+        <result property="orderId" column="order_id"/>
+        <result property="productId" column="product_id"/>
+        <result property="productName" column="product_name"/>
+        <result property="specification" column="specification"/>
+        <result property="quantity" column="quantity"/>
+        <result property="unitPrice" column="unit_price"/>
     </resultMap>
 
     <sql id="selectOrderVo">
-        select o.order_id, o.order_number, o.customer_id, c.customer_name, o.total_amount, o.order_status, o.create_by, o.create_time, o.update_by, o.update_time, o.remark,
-	        oi.item_id as sub_item_id, oi.order_id as sub_order_id, oi.product_id as sub_product_id, p.product_name as sub_product_name, oi.quantity as sub_quantity, oi.unit_price as sub_unit_price
+        select o.order_id,
+               o.order_number,
+               o.customer_id,
+               c.customer_name,
+               o.total_amount,
+               o.contract_no,
+               o.order_status,
+               o.cancel_reason,
+               o.stock_deducted,
+               o.production_task_id,
+               pt.task_no,
+               pt.task_status,
+               (select ifnull(sum(oi.quantity), 0) from t_order_item oi where oi.order_id = o.order_id) as item_count,
+               o.submit_review_time,
+               o.review_time,
+               o.contract_time,
+               o.production_start_time,
+               o.production_finish_time,
+               o.outbound_time,
+               o.complete_time,
+               o.create_by,
+               o.create_time,
+               o.update_by,
+               o.update_time,
+               o.remark
         from t_order o
-        left join t_customer c on o.customer_id = c.customer_id
-        left join t_order_item oi on o.order_id = oi.order_id
-        left join t_product p on oi.product_id = p.product_id
+        left join t_customer c on c.customer_id = o.customer_id
+        left join t_production_task pt on pt.task_id = o.production_task_id
     </sql>
 
     <select id="selectOrderList" parameterType="Order" resultMap="OrderResult">
         <include refid="selectOrderVo"/>
         <where>
-            <if test="orderNumber != null  and orderNumber != ''"> and o.order_number = #{orderNumber}</if>
-            <if test="customerId != null "> and o.customer_id = #{customerId}</if>
-            <if test="orderStatus != null  and orderStatus != ''"> and o.order_status = #{orderStatus}</if>
+            <if test="orderNumber != null and orderNumber != ''">
+                and o.order_number like concat('%', #{orderNumber}, '%')
+            </if>
+            <if test="customerId != null">
+                and o.customer_id = #{customerId}
+            </if>
+            <if test="customerName != null and customerName != ''">
+                and c.customer_name like concat('%', #{customerName}, '%')
+            </if>
+            <if test="orderStatus != null and orderStatus != ''">
+                and o.order_status = #{orderStatus}
+            </if>
+            <if test="contractNo != null and contractNo != ''">
+                and o.contract_no like concat('%', #{contractNo}, '%')
+            </if>
+            <if test="productName != null and productName != ''">
+                and exists (
+                    select 1
+                    from t_order_item eoi
+                    left join t_product ep on ep.product_id = eoi.product_id
+                    where eoi.order_id = o.order_id
+                      and ep.product_name like concat('%', #{productName}, '%')
+                )
+            </if>
+            <if test="params.beginTime != null and params.beginTime != ''">
+                and o.create_time &gt;= #{params.beginTime}
+            </if>
+            <if test="params.endTime != null and params.endTime != ''">
+                and o.create_time &lt;= #{params.endTime}
+            </if>
         </where>
+        order by o.create_time desc, o.order_id desc
     </select>
-    
+
     <select id="selectOrderByOrderId" parameterType="Long" resultMap="OrderResult">
         <include refid="selectOrderVo"/>
         where o.order_id = #{orderId}
     </select>
-        
+
+    <select id="selectOrderItemListByOrderId" parameterType="Long" resultMap="OrderItemResult">
+        select oi.item_id,
+               oi.order_id,
+               oi.product_id,
+               p.product_name,
+               p.specification,
+               oi.quantity,
+               oi.unit_price
+        from t_order_item oi
+        left join t_product p on p.product_id = oi.product_id
+        where oi.order_id = #{orderId}
+        order by oi.item_id asc
+    </select>
+
     <insert id="insertOrder" parameterType="Order" useGeneratedKeys="true" keyProperty="orderId">
-        insert into t_order
-        <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="orderNumber != null and orderNumber != ''">order_number,</if>
-            <if test="customerId != null">customer_id,</if>
-            <if test="totalAmount != null">total_amount,</if>
-            <if test="orderStatus != null and orderStatus != ''">order_status,</if>
-            <if test="createBy != null and createBy != ''">create_by,</if>
-            <if test="createTime != null">create_time,</if>
-            <if test="updateBy != null and updateBy != ''">update_by,</if>
-            <if test="updateTime != null">update_time,</if>
-            <if test="remark != null and remark != ''">remark,</if>
-         </trim>
-        <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="orderNumber != null and orderNumber != ''">#{orderNumber},</if>
-            <if test="customerId != null">#{customerId},</if>
-            <if test="totalAmount != null">#{totalAmount},</if>
-            <if test="orderStatus != null and orderStatus != ''">#{orderStatus},</if>
-            <if test="createBy != null and createBy != ''">#{createBy},</if>
-            <if test="createTime != null">#{createTime},</if>
-            <if test="updateBy != null and updateBy != ''">#{updateBy},</if>
-            <if test="updateTime != null">#{updateTime},</if>
-            <if test="remark != null and remark != ''">#{remark},</if>
-         </trim>
+        insert into t_order (
+            order_number,
+            customer_id,
+            total_amount,
+            contract_no,
+            order_status,
+            cancel_reason,
+            stock_deducted,
+            production_task_id,
+            submit_review_time,
+            review_time,
+            contract_time,
+            production_start_time,
+            production_finish_time,
+            outbound_time,
+            complete_time,
+            create_by,
+            create_time,
+            update_by,
+            update_time,
+            remark
+        ) values (
+            #{orderNumber},
+            #{customerId},
+            #{totalAmount},
+            #{contractNo},
+            #{orderStatus},
+            #{cancelReason},
+            #{stockDeducted},
+            #{productionTaskId},
+            #{submitReviewTime},
+            #{reviewTime},
+            #{contractTime},
+            #{productionStartTime},
+            #{productionFinishTime},
+            #{outboundTime},
+            #{completeTime},
+            #{createBy},
+            #{createTime},
+            #{updateBy},
+            #{updateTime},
+            #{remark}
+        )
     </insert>
 
     <update id="updateOrder" parameterType="Order">
         update t_order
-        <trim prefix="SET" suffixOverrides=",">
-            <if test="orderNumber != null and orderNumber != ''">order_number = #{orderNumber},</if>
-            <if test="customerId != null">customer_id = #{customerId},</if>
-            <if test="totalAmount != null">total_amount = #{totalAmount},</if>
-            <if test="orderStatus != null and orderStatus != ''">order_status = #{orderStatus},</if>
-            <if test="createBy != null and createBy != ''">create_by = #{createBy},</if>
-            <if test="createTime != null">create_time = #{createTime},</if>
-            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
-            <if test="updateTime != null">update_time = #{updateTime},</if>
-            <if test="remark != null">remark = #{remark},</if>
+        <trim prefix="set" suffixOverrides=",">
+            order_number = #{orderNumber},
+            customer_id = #{customerId},
+            total_amount = #{totalAmount},
+            contract_no = #{contractNo},
+            order_status = #{orderStatus},
+            cancel_reason = #{cancelReason},
+            stock_deducted = #{stockDeducted},
+            production_task_id = #{productionTaskId},
+            submit_review_time = #{submitReviewTime},
+            review_time = #{reviewTime},
+            contract_time = #{contractTime},
+            production_start_time = #{productionStartTime},
+            production_finish_time = #{productionFinishTime},
+            outbound_time = #{outboundTime},
+            complete_time = #{completeTime},
+            create_by = #{createBy},
+            create_time = #{createTime},
+            update_by = #{updateBy},
+            update_time = #{updateTime},
+            remark = #{remark}
         </trim>
         where order_id = #{orderId}
     </update>
@@ -97,15 +206,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         delete from t_order where order_id = #{orderId}
     </delete>
 
-    <delete id="deleteOrderByOrderIds" parameterType="String">
-        delete from t_order where order_id in 
+    <delete id="deleteOrderByOrderIds" parameterType="Long">
+        delete from t_order where order_id in
         <foreach item="orderId" collection="array" open="(" separator="," close=")">
             #{orderId}
         </foreach>
     </delete>
 
-    <delete id="deleteOrderItemByOrderIds" parameterType="String">
-        delete from t_order_item where order_id in 
+    <delete id="deleteOrderItemByOrderIds" parameterType="Long">
+        delete from t_order_item where order_id in
         <foreach item="orderId" collection="array" open="(" separator="," close=")">
             #{orderId}
         </foreach>
@@ -116,9 +225,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </delete>
 
     <insert id="batchOrderItem">
-        insert into t_order_item( order_id, product_id, quantity, unit_price) values
-        <foreach item="item" index="index" collection="list" separator=",">
-            ( #{item.orderId}, #{item.productId}, #{item.quantity}, #{item.unitPrice})
+        insert into t_order_item (order_id, product_id, quantity, unit_price) values
+        <foreach item="item" collection="list" separator=",">
+            (#{item.orderId}, #{item.productId}, #{item.quantity}, #{item.unitPrice})
         </foreach>
     </insert>
 </mapper>

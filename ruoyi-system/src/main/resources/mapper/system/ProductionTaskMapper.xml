@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.ProductionTaskMapper">
+
+    <resultMap type="ProductionTask" id="ProductionTaskResult">
+        <result property="taskId" column="task_id"/>
+        <result property="taskNo" column="task_no"/>
+        <result property="orderId" column="order_id"/>
+        <result property="orderNumber" column="order_number"/>
+        <result property="taskStatus" column="task_status"/>
+        <result property="plannedQuantity" column="planned_quantity"/>
+        <result property="createMode" column="create_mode"/>
+        <result property="assigneeId" column="assignee_id"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <insert id="insertProductionTask" parameterType="ProductionTask" useGeneratedKeys="true" keyProperty="taskId">
+        insert into t_production_task (
+            task_no,
+            order_id,
+            order_number,
+            task_status,
+            planned_quantity,
+            create_mode,
+            assignee_id,
+            create_by,
+            create_time,
+            update_by,
+            update_time,
+            remark
+        ) values (
+            #{taskNo},
+            #{orderId},
+            #{orderNumber},
+            #{taskStatus},
+            #{plannedQuantity},
+            #{createMode},
+            #{assigneeId},
+            #{createBy},
+            #{createTime},
+            #{updateBy},
+            #{updateTime},
+            #{remark}
+        )
+    </insert>
+
+    <select id="selectProductionTaskListByOrderId" parameterType="Long" resultMap="ProductionTaskResult">
+        select task_id, task_no, order_id, order_number, task_status, planned_quantity, create_mode,
+               assignee_id, create_by, create_time, update_by, update_time, remark
+        from t_production_task
+        where order_id = #{orderId}
+        order by task_id desc
+    </select>
+
+    <select id="selectLatestProductionTaskByOrderId" parameterType="Long" resultMap="ProductionTaskResult">
+        select task_id, task_no, order_id, order_number, task_status, planned_quantity, create_mode,
+               assignee_id, create_by, create_time, update_by, update_time, remark
+        from t_production_task
+        where order_id = #{orderId}
+        order by task_id desc
+        limit 1
+    </select>
+
+    <update id="updateProductionTaskStatus" parameterType="ProductionTask">
+        update t_production_task
+        <trim prefix="set" suffixOverrides=",">
+            <if test="taskStatus != null and taskStatus != ''">task_status = #{taskStatus},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            remark = #{remark}
+        </trim>
+        where task_id = #{taskId}
+    </update>
+</mapper>
