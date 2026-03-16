@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.SysSiteSettingsMapper">
+    
+    <resultMap type="SysSiteSettings" id="SysSiteSettingsResult">
+        <id     property="id"                column="id"                 />
+        <result property="siteName"          column="site_name"          />
+        <result property="siteDescription"   column="site_description"   />
+        <result property="about"            column="about"              />
+        <result property="avatar"            column="avatar"             />
+        <result property="email"             column="email"              />
+        <result property="github"             column="github"             />
+        <result property="juejin"            column="juejin"             />
+        <result property="createTime"        column="create_time"        />
+        <result property="updateTime"        column="update_time"        />
+    </resultMap>
+    
+    <sql id="selectSiteSettingsVo">
+        select id, site_name, site_description, about, avatar, email, github, juejin, create_time, update_time 
+        from sys_site_settings
+    </sql>
+    
+    <select id="selectSiteSettingsList" parameterType="SysSiteSettings" resultMap="SysSiteSettingsResult">
+        <include refid="selectSiteSettingsVo"/>
+    </select>
+    
+    <select id="selectSiteSettingsById" parameterType="Long" resultMap="SysSiteSettingsResult">
+        <include refid="selectSiteSettingsVo"/>
+        where id = #{id}
+    </select>
+    
+    <select id="selectSiteSettings" resultMap="SysSiteSettingsResult">
+        <include refid="selectSiteSettingsVo"/>
+        limit 1
+    </select>
+    
+    <insert id="insertSiteSettings" parameterType="SysSiteSettings" useGeneratedKeys="true" keyProperty="id">
+        insert into sys_site_settings (
+            <if test="siteName != null">site_name,</if>
+            <if test="siteDescription != null">site_description,</if>
+            <if test="about != null">about,</if>
+            <if test="avatar != null">avatar,</if>
+            <if test="email != null">email,</if>
+            <if test="github != null">github,</if>
+            <if test="juejin != null">juejin,</if>
+            create_time
+        )values(
+            <if test="siteName != null">#{siteName},</if>
+            <if test="siteDescription != null">#{siteDescription},</if>
+            <if test="about != null">#{about},</if>
+            <if test="avatar != null">#{avatar},</if>
+            <if test="email != null">#{email},</if>
+            <if test="github != null">#{github},</if>
+            <if test="juejin != null">#{juejin},</if>
+            sysdate()
+        )
+    </insert>
+    
+    <update id="updateSiteSettings" parameterType="SysSiteSettings">
+        update sys_site_settings 
+        <set>
+            <if test="siteName != null">site_name = #{siteName},</if>
+            <if test="siteDescription != null">site_description = #{siteDescription},</if>
+            <if test="about != null">about = #{about},</if>
+            <if test="avatar != null">avatar = #{avatar},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="github != null">github = #{github},</if>
+            <if test="juejin != null">juejin = #{juejin},</if>
+            update_time = sysdate()
+        </set>
+        where id = #{id}
+    </update>
+    
+</mapper>

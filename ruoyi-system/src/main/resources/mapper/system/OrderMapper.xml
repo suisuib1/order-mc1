@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.OrderMapper">
+    
+    <resultMap type="Order" id="OrderResult">
+        <result property="orderId"    column="order_id"    />
+        <result property="orderNumber"    column="order_number"    />
+        <result property="customerId"    column="customer_id"    />
+        <result property="customerName"    column="customer_name"    />
+        <result property="totalAmount"    column="total_amount"    />
+        <result property="orderStatus"    column="order_status"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <collection property="orderItemList" notNullColumn="sub_item_id" javaType="java.util.List" resultMap="OrderItemResult" />
+    </resultMap>
+
+    <resultMap type="OrderItem" id="OrderItemResult">
+        <result property="itemId"    column="sub_item_id"    />
+        <result property="orderId"    column="sub_order_id"    />
+        <result property="productId"    column="sub_product_id"    />
+        <result property="productName"    column="sub_product_name"    />
+        <result property="quantity"    column="sub_quantity"    />
+        <result property="unitPrice"    column="sub_unit_price"    />
+    </resultMap>
+
+    <sql id="selectOrderVo">
+        select o.order_id, o.order_number, o.customer_id, c.customer_name, o.total_amount, o.order_status, o.create_by, o.create_time, o.update_by, o.update_time, o.remark,
+	        oi.item_id as sub_item_id, oi.order_id as sub_order_id, oi.product_id as sub_product_id, p.product_name as sub_product_name, oi.quantity as sub_quantity, oi.unit_price as sub_unit_price
+        from t_order o
+        left join t_customer c on o.customer_id = c.customer_id
+        left join t_order_item oi on o.order_id = oi.order_id
+        left join t_product p on oi.product_id = p.product_id
+    </sql>
+
+    <select id="selectOrderList" parameterType="Order" resultMap="OrderResult">
+        <include refid="selectOrderVo"/>
+        <where>
+            <if test="orderNumber != null  and orderNumber != ''"> and o.order_number = #{orderNumber}</if>
+            <if test="customerId != null "> and o.customer_id = #{customerId}</if>
+            <if test="orderStatus != null  and orderStatus != ''"> and o.order_status = #{orderStatus}</if>
+        </where>
+    </select>
+    
+    <select id="selectOrderByOrderId" parameterType="Long" resultMap="OrderResult">
+        <include refid="selectOrderVo"/>
+        where o.order_id = #{orderId}
+    </select>
+        
+    <insert id="insertOrder" parameterType="Order" useGeneratedKeys="true" keyProperty="orderId">
+        insert into t_order
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="orderNumber != null and orderNumber != ''">order_number,</if>
+            <if test="customerId != null">customer_id,</if>
+            <if test="totalAmount != null">total_amount,</if>
+            <if test="orderStatus != null and orderStatus != ''">order_status,</if>
+            <if test="createBy != null and createBy != ''">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null and updateBy != ''">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null and remark != ''">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="orderNumber != null and orderNumber != ''">#{orderNumber},</if>
+            <if test="customerId != null">#{customerId},</if>
+            <if test="totalAmount != null">#{totalAmount},</if>
+            <if test="orderStatus != null and orderStatus != ''">#{orderStatus},</if>
+            <if test="createBy != null and createBy != ''">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null and updateBy != ''">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null and remark != ''">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateOrder" parameterType="Order">
+        update t_order
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="orderNumber != null and orderNumber != ''">order_number = #{orderNumber},</if>
+            <if test="customerId != null">customer_id = #{customerId},</if>
+            <if test="totalAmount != null">total_amount = #{totalAmount},</if>
+            <if test="orderStatus != null and orderStatus != ''">order_status = #{orderStatus},</if>
+            <if test="createBy != null and createBy != ''">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where order_id = #{orderId}
+    </update>
+
+    <delete id="deleteOrderByOrderId" parameterType="Long">
+        delete from t_order where order_id = #{orderId}
+    </delete>
+
+    <delete id="deleteOrderByOrderIds" parameterType="String">
+        delete from t_order where order_id in 
+        <foreach item="orderId" collection="array" open="(" separator="," close=")">
+            #{orderId}
+        </foreach>
+    </delete>
+
+    <delete id="deleteOrderItemByOrderIds" parameterType="String">
+        delete from t_order_item where order_id in 
+        <foreach item="orderId" collection="array" open="(" separator="," close=")">
+            #{orderId}
+        </foreach>
+    </delete>
+
+    <delete id="deleteOrderItemByOrderId" parameterType="Long">
+        delete from t_order_item where order_id = #{orderId}
+    </delete>
+
+    <insert id="batchOrderItem">
+        insert into t_order_item( order_id, product_id, quantity, unit_price) values
+        <foreach item="item" index="index" collection="list" separator=",">
+            ( #{item.orderId}, #{item.productId}, #{item.quantity}, #{item.unitPrice})
+        </foreach>
+    </insert>
+</mapper>

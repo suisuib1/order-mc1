@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.SysExperienceMapper">
+    
+    <resultMap type="SysExperience" id="SysExperienceResult">
+        <id     property="id"          column="id"           />
+        <result property="company"    column="company"      />
+        <result property="position"   column="position"     />
+        <result property="period"     column="period"       />
+        <result property="description" column="description"  />
+        <result property="createTime"  column="create_time"  />
+        <result property="updateTime"  column="update_time"  />
+    </resultMap>
+    
+    <sql id="selectExperienceVo">
+        select id, company, position, period, description, create_time, update_time 
+        from sys_experience
+    </sql>
+    
+    <select id="selectExperienceList" parameterType="SysExperience" resultMap="SysExperienceResult">
+        <include refid="selectExperienceVo"/>
+        <where>
+            <if test="company != null and company != ''">
+                AND company like concat('%', #{company}, '%')
+            </if>
+        </where>
+    </select>
+    
+    <select id="selectExperienceById" parameterType="Long" resultMap="SysExperienceResult">
+        <include refid="selectExperienceVo"/>
+        where id = #{id}
+    </select>
+    
+    <insert id="insertExperience" parameterType="SysExperience" useGeneratedKeys="true" keyProperty="id">
+        insert into sys_experience (
+            <if test="company != null and company != ''">company,</if>
+            <if test="position != null">position,</if>
+            <if test="period != null">period,</if>
+            <if test="description != null">description,</if>
+            create_time
+        )values(
+            <if test="company != null and company != ''">#{company},</if>
+            <if test="position != null">#{position},</if>
+            <if test="period != null">#{period},</if>
+            <if test="description != null">#{description},</if>
+            sysdate()
+        )
+    </insert>
+    
+    <update id="updateExperience" parameterType="SysExperience">
+        update sys_experience 
+        <set>
+            <if test="company != null and company != ''">company = #{company},</if>
+            <if test="position != null">position = #{position},</if>
+            <if test="period != null">period = #{period},</if>
+            <if test="description != null">description = #{description},</if>
+            update_time = sysdate()
+        </set>
+        where id = #{id}
+    </update>
+    
+    <delete id="deleteExperienceById" parameterType="Long">
+        delete from sys_experience where id = #{id}
+    </delete>
+    
+    <delete id="deleteExperienceByIds" parameterType="Long">
+        delete from sys_experience where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+</mapper>

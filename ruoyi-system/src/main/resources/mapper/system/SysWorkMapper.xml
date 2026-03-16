@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.SysWorkMapper">
+    
+    <resultMap type="SysWork" id="SysWorkResult">
+        <id     property="id"          column="id"           />
+        <result property="title"       column="title"        />
+        <result property="description" column="description"  />
+        <result property="tags"        column="tags"         />
+        <result property="image"       column="image"        />
+        <result property="link"        column="link"         />
+        <result property="createdAt"  column="created_at"   />
+        <result property="createTime"  column="create_time"  />
+        <result property="updateTime"  column="update_time"  />
+    </resultMap>
+    
+    <sql id="selectWorkVo">
+        select id, title, description, tags, image, link, created_at, create_time, update_time 
+        from sys_work
+    </sql>
+    
+    <select id="selectWorkList" parameterType="SysWork" resultMap="SysWorkResult">
+        <include refid="selectWorkVo"/>
+        <where>
+            <if test="title != null and title != ''">
+                AND title like concat('%', #{title}, '%')
+            </if>
+        </where>
+        order by created_at desc
+    </select>
+    
+    <select id="selectWorkById" parameterType="Long" resultMap="SysWorkResult">
+        <include refid="selectWorkVo"/>
+        where id = #{id}
+    </select>
+    
+    <insert id="insertWork" parameterType="SysWork" useGeneratedKeys="true" keyProperty="id">
+        insert into sys_work (
+            <if test="title != null and title != ''">title,</if>
+            <if test="description != null">description,</if>
+            <if test="tags != null">tags,</if>
+            <if test="image != null">image,</if>
+            <if test="link != null">link,</if>
+            <if test="createdAt != null">created_at,</if>
+            create_time
+        )values(
+            <if test="title != null and title != ''">#{title},</if>
+            <if test="description != null">#{description},</if>
+            <if test="tags != null">#{tags},</if>
+            <if test="image != null">#{image},</if>
+            <if test="link != null">#{link},</if>
+            <if test="createdAt != null">#{createdAt},</if>
+            sysdate()
+        )
+    </insert>
+    
+    <update id="updateWork" parameterType="SysWork">
+        update sys_work 
+        <set>
+            <if test="title != null and title != ''">title = #{title},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="tags != null">tags = #{tags},</if>
+            <if test="image != null">image = #{image},</if>
+            <if test="link != null">link = #{link},</if>
+            <if test="createdAt != null">created_at = #{createdAt},</if>
+            update_time = sysdate()
+        </set>
+        where id = #{id}
+    </update>
+    
+    <delete id="deleteWorkById" parameterType="Long">
+        delete from sys_work where id = #{id}
+    </delete>
+    
+    <delete id="deleteWorkByIds" parameterType="Long">
+        delete from sys_work where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+</mapper>

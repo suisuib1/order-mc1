@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.SysSkillMapper">
+    
+    <resultMap type="SysSkill" id="SysSkillResult">
+        <id     property="id"          column="id"           />
+        <result property="name"       column="name"         />
+        <result property="icon"        column="icon"         />
+        <result property="level"       column="level"        />
+        <result property="createTime"  column="create_time"  />
+        <result property="updateTime"  column="update_time"  />
+    </resultMap>
+    
+    <sql id="selectSkillVo">
+        select id, name, icon, level, create_time, update_time 
+        from sys_skill
+    </sql>
+    
+    <select id="selectSkillList" parameterType="SysSkill" resultMap="SysSkillResult">
+        <include refid="selectSkillVo"/>
+        <where>
+            <if test="name != null and name != ''">
+                AND name like concat('%', #{name}, '%')
+            </if>
+        </where>
+        order by level desc
+    </select>
+    
+    <select id="selectSkillById" parameterType="Long" resultMap="SysSkillResult">
+        <include refid="selectSkillVo"/>
+        where id = #{id}
+    </select>
+    
+    <insert id="insertSkill" parameterType="SysSkill" useGeneratedKeys="true" keyProperty="id">
+        insert into sys_skill (
+            <if test="name != null and name != ''">name,</if>
+            <if test="icon != null">icon,</if>
+            <if test="level != null">level,</if>
+            create_time
+        )values(
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="icon != null">#{icon},</if>
+            <if test="level != null">#{level},</if>
+            sysdate()
+        )
+    </insert>
+    
+    <update id="updateSkill" parameterType="SysSkill">
+        update sys_skill 
+        <set>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="icon != null">icon = #{icon},</if>
+            <if test="level != null">level = #{level},</if>
+            update_time = sysdate()
+        </set>
+        where id = #{id}
+    </update>
+    
+    <delete id="deleteSkillById" parameterType="Long">
+        delete from sys_skill where id = #{id}
+    </delete>
+    
+    <delete id="deleteSkillByIds" parameterType="Long">
+        delete from sys_skill where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+</mapper>
